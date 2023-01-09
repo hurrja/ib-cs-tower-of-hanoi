@@ -86,7 +86,7 @@ public class TOHUserInterface extends JFrame implements KeyListener
       }
     }
   }
-    
+
   public void drawApplication (Graphics2D graphics)
   {
     assert graphics != null;
@@ -110,7 +110,8 @@ public class TOHUserInterface extends JFrame implements KeyListener
     {
       graphics.setColor (Color.black);
       final int x = pegIndex * width / (NUM_PEGS + 1);
-      drawString (graphics, peg.toString (), x, pegLabelY); // peg label
+      String label = String.format("%s: %s", peg, workingTOH.getPegLabel(peg));
+      drawString (graphics, label, x - label.length()*3, pegLabelY); // peg label
       graphics.drawRect (x - pegWidth / 2, pegTopY, pegWidth, pegHeight); // peg
 
       // discs
@@ -145,10 +146,8 @@ public class TOHUserInterface extends JFrame implements KeyListener
   }
 
   public void pause() {
-    if (isRunning) applicationUpdateTimer.stop();
+    if (applicationUpdateTimer.isRunning()) applicationUpdateTimer.stop();
     else applicationUpdateTimer.restart();
-
-    isRunning = !isRunning;
   }
   
   public void drawString (Graphics2D graphics,
@@ -213,6 +212,11 @@ public class TOHUserInterface extends JFrame implements KeyListener
   @Override
   public void keyPressed (KeyEvent e)
   {
+    int keyCode = e.getKeyCode();
+    switch (keyCode) {
+      case KeyEvent.VK_LEFT:
+
+    }
   }
   
   @Override
@@ -228,6 +232,4 @@ public class TOHUserInterface extends JFrame implements KeyListener
   public final int NUM_PEGS = Peg.values ().length;
   private TowerOfHanoi toh;
   private TowerOfHanoi workingTOH;
-  private boolean isRunning = true;
-
 }

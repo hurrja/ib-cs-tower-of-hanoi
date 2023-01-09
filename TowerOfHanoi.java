@@ -24,9 +24,13 @@ public class TowerOfHanoi
   public TowerOfHanoi (int numDiscs)
   {
     towers = new EnumMap<> (Peg.class);
-    for (Peg peg : Peg.values ())
-      towers.put (peg, new Stack<> ());
-    
+    pegLabels = new EnumMap<>(Peg.class);
+
+    for (Peg peg : Peg.values ()) {
+      towers.put(peg, new Stack<>());
+      pegLabels.put(peg, peg.getDefaultLabel());
+    }
+
     for (int i = numDiscs; i >= 1; i--)
       towers.get (Peg.A).push (i);
     
@@ -41,6 +45,17 @@ public class TowerOfHanoi
     
     towers.get (to).push (towers.get (from).pop ());
     moves.add (new Move (from, to));
+
+    pegLabels.replace(from, Peg.A.getDefaultLabel());
+    pegLabels.replace(to, Peg.C.getDefaultLabel());
+
+    //find the intermediate peg through an obscure mechanism
+    for (Peg peg : Peg.values()) {
+      if (peg != from && peg != to) {
+        pegLabels.replace(peg, Peg.B.getDefaultLabel());
+        break;
+      }
+    }
   }
     
   public int getNumDiscs ()
@@ -70,6 +85,10 @@ public class TowerOfHanoi
   {
     return moves;
   }
+
+  public String getPegLabel(Peg peg) {
+    return pegLabels.get(peg);
+  }
   
   public String toString ()
   {
@@ -82,6 +101,7 @@ public class TowerOfHanoi
   }
   
   private Map<Peg,Stack<Integer>> towers;
+  private Map<Peg, String> pegLabels;
   private Queue<Move> moves;
   private int numDiscs;
 }

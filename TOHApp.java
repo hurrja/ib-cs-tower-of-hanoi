@@ -27,9 +27,13 @@ public class TOHApp
   {
     // WARNING: Solution given!
     if (numDiscs == 0) return; //base case
+    System.out.printf("1: %s -> %s using %s, %d \n", from, to, intermediate, numDiscs);
     move(toh, numDiscs-1, from, intermediate, to); //move n-1 discs from the top to the intermediate
+    System.out.printf("move %s to %s completed \n", from, to);
     toh.move(from, to); // move the bottom disk to the final destination
     move(toh, numDiscs-1, intermediate, to, from); // move the n-1 discs back from intermediate to the final destination
+    System.out.printf("2: %s -> %s using %s, %d \n", from, to, intermediate, numDiscs);
+    //System.out.printf("%s - %s - %s \n", from, to, intermediate);
   }
   
   public TOHApp ()
