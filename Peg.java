@@ -1,4 +1,4 @@
-enum Peg
+public enum Peg
 {
   A, B, C;
 }

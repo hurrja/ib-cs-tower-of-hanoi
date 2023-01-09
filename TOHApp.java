@@ -25,10 +25,11 @@ public class TOHApp
   public static void move (TowerOfHanoi toh, int numDiscs, Peg from, Peg to, Peg intermediate)
     throws IllegalTowerOfHanoiMoveException
   {
-    // code to be written to replace this feeble attempt
-    toh.move (from, intermediate); // move top disc to intermediate
-    toh.move (from, to); // move next disc to target
-    toh.move (from, to); // move next disc to target
+    // WARNING: Solution given!
+    if (numDiscs == 0) return; //base case
+    move(toh, numDiscs-1, from, intermediate, to); //move n-1 discs from the top to the intermediate
+    toh.move(from, to); // move the bottom disk to the final destination
+    move(toh, numDiscs-1, intermediate, to, from); // move the n-1 discs back from intermediate to the final destination
   }
   
   public TOHApp ()

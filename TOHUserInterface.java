@@ -143,6 +143,13 @@ public class TOHUserInterface extends JFrame implements KeyListener
   {
     applicationUpdateTimer.setDelay (applicationUpdateTimer.getDelay () * 2);
   }
+
+  public void pause() {
+    if (isRunning) applicationUpdateTimer.stop();
+    else applicationUpdateTimer.restart();
+
+    isRunning = !isRunning;
+  }
   
   public void drawString (Graphics2D graphics,
                           String str,
@@ -194,6 +201,9 @@ public class TOHUserInterface extends JFrame implements KeyListener
       case '-':
         slowdown ();
         break;
+      case ' ':
+        pause();
+        break;
       default:
         break;
     }
@@ -218,5 +228,6 @@ public class TOHUserInterface extends JFrame implements KeyListener
   public final int NUM_PEGS = Peg.values ().length;
   private TowerOfHanoi toh;
   private TowerOfHanoi workingTOH;
+  private boolean isRunning = true;
 
 }
