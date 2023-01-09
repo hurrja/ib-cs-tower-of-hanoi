@@ -20,6 +20,7 @@
    | ~+~ | speed up animation  |
    | ~-~ | slow down animation |
    | ~q~ | quit                |
+   | ~ ~ | pause               |
 
 ** Programming your solution
    Class =TOHApp= contains method
