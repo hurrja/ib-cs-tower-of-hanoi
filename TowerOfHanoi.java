@@ -13,22 +13,16 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import java.util.Stack;
-import java.util.EnumMap;
-import java.util.Map;
-import java.util.Queue;
-import java.util.LinkedList;
+import java.util.*;
 
 public class TowerOfHanoi
 {
   public TowerOfHanoi (int numDiscs)
   {
     towers = new EnumMap<> (Peg.class);
-    pegLabels = new EnumMap<>(Peg.class);
 
     for (Peg peg : Peg.values ()) {
       towers.put(peg, new Stack<>());
-      pegLabels.put(peg, peg.getDefaultLabel());
     }
 
     for (int i = numDiscs; i >= 1; i--)
@@ -45,19 +39,17 @@ public class TowerOfHanoi
     
     towers.get (to).push (towers.get (from).pop ());
     moves.add (new Move (from, to));
-
-    pegLabels.replace(from, Peg.A.getDefaultLabel());
-    pegLabels.replace(to, Peg.C.getDefaultLabel());
-
-    //find the intermediate peg through an obscure mechanism
-    for (Peg peg : Peg.values()) {
-      if (peg != from && peg != to) {
-        pegLabels.replace(peg, Peg.B.getDefaultLabel());
-        break;
-      }
-    }
   }
-    
+
+  public Move undoLastMove() {
+    Move lastMove = getMoves().removeLast();
+    Peg from = lastMove.from, to = lastMove.to;
+
+    towers.get(from).push(towers.get(to).pop());
+
+    return lastMove;
+  }
+
   public int getNumDiscs ()
   {
     return numDiscs;
@@ -81,15 +73,11 @@ public class TowerOfHanoi
       return (towers.get (peg).peek ());
   }
   
-  public Queue<Move> getMoves ()
+  public Deque<Move> getMoves ()
   {
     return moves;
   }
 
-  public String getPegLabel(Peg peg) {
-    return pegLabels.get(peg);
-  }
-  
   public String toString ()
   {
     StringBuffer strBuf = new StringBuffer ();
@@ -101,7 +89,6 @@ public class TowerOfHanoi
   }
   
   private Map<Peg,Stack<Integer>> towers;
-  private Map<Peg, String> pegLabels;
-  private Queue<Move> moves;
+  private Deque<Move> moves;
   private int numDiscs;
 }

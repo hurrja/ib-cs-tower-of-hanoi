@@ -15,19 +15,17 @@
 
 import javax.swing.*;        
 import java.awt.*;
-import java.awt.geom.*;
 import java.awt.event.*;
-import java.awt.font.*;
 
-public class TOHUserInterface extends JFrame implements KeyListener
+public class TOHUserInterface extends JFrame
 {
-  public TOHUserInterface (TowerOfHanoi toh)
+
+  public TOHUserInterface (TOHApp controller, TowerOfHanoi viewToh)
   {
     super ("Tower of Hanoi solution framework");
-    this.toh = toh;
-
-    // working TOH to replicate moves
-    workingTOH = new TowerOfHanoi (toh.getNumDiscs ()); 
+    this.viewToh = viewToh;
+    this.controller = controller;
+    initializeKeyBindings();
 
     setSize (XSIZE, YSIZE);
     setDefaultCloseOperation (JFrame.EXIT_ON_CLOSE);
@@ -36,16 +34,16 @@ public class TOHUserInterface extends JFrame implements KeyListener
         @Override
         public void windowOpened (WindowEvent e)
         {
-          applicationUpdateTimer.start ();
-        } 
-        
+          applicationUpdateTimer.start();
+        }
+
         @Override
         public void windowClosing (WindowEvent e)
         {
-          System.exit (0);          
+          new Quit().actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, null));
         }
       });
-        
+
     JPanel panel = new JPanel ()
       {
         @Override
@@ -55,35 +53,23 @@ public class TOHUserInterface extends JFrame implements KeyListener
           drawApplication ((Graphics2D) graphics);
         }
       };
-
-    panel.setFocusable (true);
-    panel.addKeyListener (this);
-    panel.requestFocus ();
     add (panel);
+
+    setDefaultCloseOperation(EXIT_ON_CLOSE);
+    panel.setFocusable (true);
+    panel.requestFocus ();
     setVisible (true);
 
-    applicationUpdateTimer = new Timer (updateIntervalMs,
-                                        (ActionEvent e) ->
-                                        {
-                                          updateApplication ();
-                                          repaint ();
-                                        });
-    Timer.setLogTimers (false);
+    applicationUpdateTimer = new Timer (updateIntervalMs, new Move());
   }
-    
-  private void updateApplication ()
-  {
-    java.util.Queue<Move> moves = toh.getMoves ();
-    if (!moves.isEmpty ())
-    {
-      Move move = moves.remove ();
-      try
-      {
-        workingTOH.move (move.from, move.to);
-      }
-      catch (IllegalTowerOfHanoiMoveException e)
-      {
-      }
+
+  private void initializeKeyBindings() {
+    InputMap inputMap = getRootPane().getInputMap();
+    ActionMap actionMap = getRootPane().getActionMap();
+
+    for (KeyStrokeAction a : keyActions) {
+      inputMap.put(a.getKeyStroke(), a.getValue(Action.NAME));
+      actionMap.put(a.getValue(Action.NAME), a);
     }
   }
 
@@ -101,7 +87,7 @@ public class TOHUserInterface extends JFrame implements KeyListener
     int pegTopY = pegBaseY - pegHeight;
     int pegWidth = width / 36;
     int pegIndex = 1;
-    int numDiscs = workingTOH.getNumDiscs ();
+    int numDiscs = viewToh.getNumDiscs ();
     int discHeight = pegHeight / (numDiscs + 1);
     int discMaxWidth = width / (NUM_PEGS + 3);
     int discMinWidth = pegWidth * 2;
@@ -110,12 +96,11 @@ public class TOHUserInterface extends JFrame implements KeyListener
     {
       graphics.setColor (Color.black);
       final int x = pegIndex * width / (NUM_PEGS + 1);
-      String label = String.format("%s: %s", peg, workingTOH.getPegLabel(peg));
-      drawString (graphics, label, x - label.length()*3, pegLabelY); // peg label
+      drawString (graphics, peg.toString(), x, pegLabelY); // peg label
       graphics.drawRect (x - pegWidth / 2, pegTopY, pegWidth, pegHeight); // peg
 
       // discs
-      Integer[] discs = workingTOH.getDiscs (peg);
+      Integer[] discs = viewToh.getDiscs (peg);
       int numPegDiscs = discs.length;
       for (int i = 0; i < numPegDiscs; i++)
       {
@@ -134,22 +119,7 @@ public class TOHUserInterface extends JFrame implements KeyListener
       pegIndex++;
     }
   }
-  
-  public void speedup ()
-  {
-    applicationUpdateTimer.setDelay (applicationUpdateTimer.getDelay () / 2);
-  }
 
-  public void slowdown ()
-  {
-    applicationUpdateTimer.setDelay (applicationUpdateTimer.getDelay () * 2);
-  }
-
-  public void pause() {
-    if (applicationUpdateTimer.isRunning()) applicationUpdateTimer.stop();
-    else applicationUpdateTimer.restart();
-  }
-  
   public void drawString (Graphics2D graphics,
                           String str,
                           int x,
@@ -185,51 +155,103 @@ public class TOHUserInterface extends JFrame implements KeyListener
     drawString (graphics, str, x, y, 16);
   }
 
-  @Override
-  public void keyTyped (KeyEvent e)
-  {
-    char keyChar = e.getKeyChar ();
-    switch (keyChar)
-    {
-      case 'q':
-        System.exit (0);
-        break;
-      case '+':
-        speedup ();
-        break;
-      case '-':
-        slowdown ();
-        break;
-      case ' ':
-        pause();
-        break;
-      default:
-        break;
+  public TOHApp getController() {
+    return controller;
+  }
+
+  class Move extends KeyStrokeAction {
+    Move() {
+      super("Move", KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, 0));
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+      getController().updateApplicationState();
+      repaint();
     }
   }
 
-  // needed for completeness to implement abstract base class
-  @Override
-  public void keyPressed (KeyEvent e)
-  {
-    int keyCode = e.getKeyCode();
-    switch (keyCode) {
-      case KeyEvent.VK_LEFT:
+  class Pause extends KeyStrokeAction {
+    Pause() {
+      super("Pause", KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0));
+    }
 
+    @Override
+    public void actionPerformed(ActionEvent e) {
+      if (applicationUpdateTimer.isRunning()) applicationUpdateTimer.stop();
+      else applicationUpdateTimer.restart();
     }
   }
-  
-  @Override
-  public void keyReleased (KeyEvent e)
-  {
+
+  class Quit extends KeyStrokeAction {
+    Quit() {
+      super("Quit", KeyStroke.getKeyStroke(KeyEvent.VK_Q, 0));
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+      dispose();
+    }
+}
+
+  class SpeedUp extends KeyStrokeAction {
+    SpeedUp() {
+      super("SpeedUp", KeyStroke.getKeyStroke('+')); //necessary to support both US and EU layouts
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+      int currDelay = applicationUpdateTimer.getDelay();
+      if (currDelay <= 1) return;
+
+      applicationUpdateTimer.setDelay(currDelay / 2);
+      System.out.println(applicationUpdateTimer.getDelay());
+    }
   }
+
+  class SlowDown extends KeyStrokeAction {
+    SlowDown() {
+      super("SlowDown", KeyStroke.getKeyStroke(KeyEvent.VK_MINUS, 0));
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+      int currDelay = applicationUpdateTimer.getDelay();
+      if (currDelay >= 10000) return;
+
+      applicationUpdateTimer.setDelay(applicationUpdateTimer.getDelay() * 2);
+      System.out.println(applicationUpdateTimer.getDelay());
+    }
+  }
+
+  class StepBack extends KeyStrokeAction {
+    StepBack() {
+      super("StepBack", KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0));
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+      getController().retractMove();
+      repaint();
+    }
+  }
+
+  private final KeyStrokeAction[] keyActions = {
+          new Move(),
+          new Pause(),
+          new Quit(),
+          new SpeedUp(),
+          new SlowDown(),
+          new StepBack(),
+  };
 
   public final int XSIZE = 1024;
   public final int YSIZE = 768;
-  private Timer applicationUpdateTimer;
-  
-  public final int updateIntervalMs = 1000;
   public final int NUM_PEGS = Peg.values ().length;
-  private TowerOfHanoi toh;
-  private TowerOfHanoi workingTOH;
+
+  private final Timer applicationUpdateTimer;
+  public final int updateIntervalMs = 1000;
+  private TowerOfHanoi viewToh;
+  private TOHApp controller;
 }
+
