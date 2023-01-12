@@ -28,21 +28,15 @@ public class TOHApp
   public static void recurse(TowerOfHanoi toh, int numDiscs, Peg from, Peg to, Peg intermediate)
     throws IllegalTowerOfHanoiMoveException
   {
-    // WARNING: Solution given!
+    // FIXME: Solution given!
     if (numDiscs == 0) return; //base case
-    //System.out.printf("1: %s -> %s using %s, %d \n", from, to, intermediate, numDiscs);
     recurse(toh, numDiscs-1, from, intermediate, to); //move n-1 discs from the top to the intermediate
-    //System.out.printf("move %s to %s completed \n", from, to);
     toh.move(from, to); // move the bottom disk to the final destination
     recurse(toh, numDiscs-1, intermediate, to, from); // move the n-1 discs back from intermediate to the final destination
-    //System.out.printf("2: %s -> %s using %s, %d \n", from, to, intermediate, numDiscs);
-    //System.out.printf("%s - %s - %s \n", from, to, intermediate);
   }
   
   public TOHApp ()
   {
-    // construct a new tower of Hanoi with 5 discs
-    final int NUM_DISCS = 10;
     toh = new TowerOfHanoi (NUM_DISCS);
     viewToh = new TowerOfHanoi(NUM_DISCS);
 
@@ -83,9 +77,15 @@ public class TOHApp
     toh.getMoves().addFirst(move);
   }
 
+  public void resetToh() {
+    while (!viewToh.getMoves().isEmpty())
+      retractMove();
+  }
+
   private final TOHUserInterface GUI;
   private TowerOfHanoi toh;
   private TowerOfHanoi viewToh;
+  final int NUM_DISCS = 10;
 }
 
 

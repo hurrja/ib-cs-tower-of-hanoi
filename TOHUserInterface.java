@@ -16,6 +16,7 @@
 import javax.swing.*;        
 import java.awt.*;
 import java.awt.event.*;
+import java.security.Key;
 
 public class TOHUserInterface extends JFrame
 {
@@ -29,22 +30,8 @@ public class TOHUserInterface extends JFrame
 
     setSize (XSIZE, YSIZE);
     setDefaultCloseOperation (JFrame.EXIT_ON_CLOSE);
-    addWindowListener (new WindowAdapter ()
-      {
-        @Override
-        public void windowOpened (WindowEvent e)
-        {
-          applicationUpdateTimer.start();
-        }
 
-        @Override
-        public void windowClosing (WindowEvent e)
-        {
-          new Quit().actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, null));
-        }
-      });
-
-    JPanel panel = new JPanel ()
+    tohPanel = new JPanel ()
       {
         @Override
         protected void paintComponent (Graphics graphics)
@@ -53,21 +40,40 @@ public class TOHUserInterface extends JFrame
           drawApplication ((Graphics2D) graphics);
         }
       };
-    add (panel);
+
+    setLayout(new BorderLayout());
+    add(tohPanel, BorderLayout.CENTER);
+    initializeButtonControls();
 
     setDefaultCloseOperation(EXIT_ON_CLOSE);
-    panel.setFocusable (true);
-    panel.requestFocus ();
     setVisible (true);
 
-    applicationUpdateTimer = new Timer (updateIntervalMs, new Move());
+    applicationUpdateTimer = new Timer (updateIntervalMs, new MoveForward());
+    applicationUpdateTimer.setActionCommand("Timer");
+  }
+
+  private void initializeButtonControls () {
+    JPanel controls = new JPanel();
+    controls.setBackground(Color.WHITE);
+
+    for (KeyStrokeAction act : actions) {
+      JButton button = new JButton();
+
+      button.setAction(act);
+      button.setFocusable(false);
+
+      if (act instanceof PlayPause) playButton = button;
+      controls.add(button);
+    }
+
+    add (controls, BorderLayout.PAGE_END);
   }
 
   private void initializeKeyBindings() {
-    InputMap inputMap = getRootPane().getInputMap();
+    InputMap inputMap = getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
     ActionMap actionMap = getRootPane().getActionMap();
 
-    for (KeyStrokeAction a : keyActions) {
+    for (KeyStrokeAction a : actions) {
       inputMap.put(a.getKeyStroke(), a.getValue(Action.NAME));
       actionMap.put(a.getValue(Action.NAME), a);
     }
@@ -76,7 +82,7 @@ public class TOHUserInterface extends JFrame
   public void drawApplication (Graphics2D graphics)
   {
     assert graphics != null;
-    final int width = getWidth (), height = getHeight ();
+    final int width = tohPanel.getWidth() , height = tohPanel.getHeight();
     graphics.setColor (Color.white);
     graphics.fillRect (0, 0, width - 1,  height - 1);
 
@@ -96,7 +102,7 @@ public class TOHUserInterface extends JFrame
     {
       graphics.setColor (Color.black);
       final int x = pegIndex * width / (NUM_PEGS + 1);
-      drawString (graphics, peg.toString(), x, pegLabelY); // peg label
+      drawString (graphics, peg.toString(), x-5, pegLabelY); // peg label
       graphics.drawRect (x - pegWidth / 2, pegTopY, pegWidth, pegHeight); // peg
 
       // discs
@@ -159,44 +165,40 @@ public class TOHUserInterface extends JFrame
     return controller;
   }
 
-  class Move extends KeyStrokeAction {
-    Move() {
-      super("Move", KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, 0));
+  class Reset extends KeyStrokeAction {
+    Reset() {
+      super("Reset", KeyStroke.getKeyStroke(KeyEvent.VK_R, 0), "R");
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-      getController().updateApplicationState();
+      if (applicationUpdateTimer.isRunning()) new PlayPause().actionPerformed(e);
+      getController().resetToh();
       repaint();
     }
   }
 
-  class Pause extends KeyStrokeAction {
-    Pause() {
-      super("Pause", KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0));
+  class PlayPause extends KeyStrokeAction {
+    PlayPause() {
+      super("Play", KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0), "Space bar");
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-      if (applicationUpdateTimer.isRunning()) applicationUpdateTimer.stop();
-      else applicationUpdateTimer.restart();
+      if (applicationUpdateTimer.isRunning()) {
+        applicationUpdateTimer.stop();
+        playButton.setText("Play");
+      }
+      else {
+        applicationUpdateTimer.restart();
+        playButton.setText("Pause");
+      }
     }
   }
 
-  class Quit extends KeyStrokeAction {
-    Quit() {
-      super("Quit", KeyStroke.getKeyStroke(KeyEvent.VK_Q, 0));
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent e) {
-      dispose();
-    }
-}
-
   class SpeedUp extends KeyStrokeAction {
     SpeedUp() {
-      super("SpeedUp", KeyStroke.getKeyStroke('+')); //necessary to support both US and EU layouts
+      super("+", KeyStroke.getKeyStroke('+'), "Increase the speed of autoplay"); //necessary to support both US and EU layouts
     }
 
     @Override
@@ -205,13 +207,12 @@ public class TOHUserInterface extends JFrame
       if (currDelay <= 1) return;
 
       applicationUpdateTimer.setDelay(currDelay / 2);
-      System.out.println(applicationUpdateTimer.getDelay());
     }
   }
 
   class SlowDown extends KeyStrokeAction {
     SlowDown() {
-      super("SlowDown", KeyStroke.getKeyStroke(KeyEvent.VK_MINUS, 0));
+      super("-", KeyStroke.getKeyStroke(KeyEvent.VK_MINUS, 0), "Decrease the speed of autoplay");
     }
 
     @Override
@@ -220,29 +221,44 @@ public class TOHUserInterface extends JFrame
       if (currDelay >= 10000) return;
 
       applicationUpdateTimer.setDelay(applicationUpdateTimer.getDelay() * 2);
-      System.out.println(applicationUpdateTimer.getDelay());
     }
   }
 
-  class StepBack extends KeyStrokeAction {
-    StepBack() {
-      super("StepBack", KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0));
+  class MoveForward extends KeyStrokeAction {
+    MoveForward() {
+      super(">", KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, 0), "Right arrow");
+      putValue(Action.ACTION_COMMAND_KEY, "ButtonPressed");
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
+      if (applicationUpdateTimer.isRunning() && e.getActionCommand().equals("ButtonPressed"))
+        new PlayPause().actionPerformed(e);
+      getController().updateApplicationState();
+      repaint();
+    }
+  }
+
+  class MoveBack extends KeyStrokeAction {
+    MoveBack() {
+      super("<", KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0), "Left arrow");
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+      if (applicationUpdateTimer.isRunning()) new PlayPause().actionPerformed(e);
       getController().retractMove();
       repaint();
     }
   }
 
-  private final KeyStrokeAction[] keyActions = {
-          new Move(),
-          new Pause(),
-          new Quit(),
+  private final KeyStrokeAction[] actions = {
+          new MoveBack(),
+          new PlayPause(),
+          new Reset(),
+          new MoveForward(),
           new SpeedUp(),
           new SlowDown(),
-          new StepBack(),
   };
 
   public final int XSIZE = 1024;
@@ -253,5 +269,8 @@ public class TOHUserInterface extends JFrame
   public final int updateIntervalMs = 1000;
   private TowerOfHanoi viewToh;
   private TOHApp controller;
+
+  private JPanel tohPanel;
+  private JButton playButton;
 }
 
