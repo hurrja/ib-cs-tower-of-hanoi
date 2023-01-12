@@ -16,7 +16,6 @@
 import javax.swing.*;        
 import java.awt.*;
 import java.awt.event.*;
-import java.security.Key;
 
 public class TOHUserInterface extends JFrame
 {
@@ -234,7 +233,7 @@ public class TOHUserInterface extends JFrame
     public void actionPerformed(ActionEvent e) {
       if (applicationUpdateTimer.isRunning() && e.getActionCommand().equals("ButtonPressed"))
         new PlayPause().actionPerformed(e);
-      getController().updateApplicationState();
+      getController().makeMove();
       repaint();
     }
   }

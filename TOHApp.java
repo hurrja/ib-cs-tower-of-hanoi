@@ -14,9 +14,6 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import javax.swing.*;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
 
 public class TOHApp
 {
@@ -25,14 +22,14 @@ public class TOHApp
     SwingUtilities.invokeLater (() -> new TOHApp ());
   }
   
-  public static void recurse(TowerOfHanoi toh, int numDiscs, Peg from, Peg to, Peg intermediate)
+  public static void solve(TowerOfHanoi toh, int numDiscs, Peg from, Peg to, Peg intermediate)
     throws IllegalTowerOfHanoiMoveException
   {
     // FIXME: Solution given!
     if (numDiscs == 0) return; //base case
-    recurse(toh, numDiscs-1, from, intermediate, to); //move n-1 discs from the top to the intermediate
+    solve(toh, numDiscs-1, from, intermediate, to); //move n-1 discs from the top to the intermediate
     toh.move(from, to); // move the bottom disk to the final destination
-    recurse(toh, numDiscs-1, intermediate, to, from); // move the n-1 discs back from intermediate to the final destination
+    solve(toh, numDiscs-1, intermediate, to, from); // move the n-1 discs back from intermediate to the final destination
   }
   
   public TOHApp ()
@@ -43,17 +40,17 @@ public class TOHApp
     try
     {
       // task is to move all discs from peg A to peg C
-      recurse(toh, NUM_DISCS, Peg.A, Peg.C, Peg.B);
+      solve(toh, NUM_DISCS, Peg.A, Peg.C, Peg.B);
     }
     catch (IllegalTowerOfHanoiMoveException e)
     {
       System.out.println ("illegal move: " + e);
     }
 
-    GUI = new TOHUserInterface (this, viewToh);
+    new TOHUserInterface (this, viewToh);
   }
 
-  public void updateApplicationState ()
+  public void makeMove()
   {
     java.util.Queue<Move> moves = toh.getMoves ();
 
@@ -82,10 +79,9 @@ public class TOHApp
       retractMove();
   }
 
-  private final TOHUserInterface GUI;
   private TowerOfHanoi toh;
   private TowerOfHanoi viewToh;
-  final int NUM_DISCS = 10;
+  final int NUM_DISCS = 5;
 }
 
 
