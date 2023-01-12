@@ -13,14 +13,6 @@
 ** Alternative installation method
    1. Clone repository.
    2. Run =ant= default target (builds and runs the application).
-   
-** GUI key bindings
-   | key | action              |
-   |-----+---------------------|
-   | ~+~ | speed up animation  |
-   | ~-~ | slow down animation |
-   | ~q~ | quit                |
-   | ~space bar~ | pause               |
 
 ** Programming your solution
    Class =TOHApp= contains method
