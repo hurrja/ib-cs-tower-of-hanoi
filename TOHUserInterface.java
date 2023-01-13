@@ -217,7 +217,7 @@ public class TOHUserInterface extends JFrame
     @Override
     public void actionPerformed(ActionEvent e) {
       int currDelay = applicationUpdateTimer.getDelay();
-      if (currDelay >= 10000) return;
+      if (currDelay >= 5000) return;
 
       applicationUpdateTimer.setDelay(applicationUpdateTimer.getDelay() * 2);
     }
