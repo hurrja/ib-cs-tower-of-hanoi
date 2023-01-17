@@ -47,7 +47,7 @@ public class TOHApp
       System.out.println ("illegal move: " + e);
     }
 
-    new TOHUserInterface (this, viewToh);
+    TOHUserInterface GUI = new TOHUserInterface (this, viewToh);
   }
 
   public void makeMove()
@@ -75,10 +75,12 @@ public class TOHApp
   }
 
   public void resetToh() {
-    while (!viewToh.getMoves().isEmpty())
-      retractMove();
+    toh = new TowerOfHanoi(NUM_DISCS);
+    viewToh = new TowerOfHanoi(NUM_DISCS);
+    GUI.setViewToh(viewToh);
   }
 
+  private TOHUserInterface GUI;
   private TowerOfHanoi toh;
   private TowerOfHanoi viewToh;
   final int NUM_DISCS = 5;

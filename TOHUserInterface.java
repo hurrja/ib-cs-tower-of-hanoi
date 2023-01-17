@@ -23,8 +23,8 @@ public class TOHUserInterface extends JFrame
   public TOHUserInterface (TOHApp controller, TowerOfHanoi viewToh)
   {
     super ("Tower of Hanoi solution framework");
-    this.viewToh = viewToh;
-    this.controller = controller;
+    setViewToh(viewToh);
+    setController(controller);
     initializeKeyBindings();
 
     setSize (XSIZE, YSIZE);
@@ -162,6 +162,14 @@ public class TOHUserInterface extends JFrame
 
   public TOHApp getController() {
     return controller;
+  }
+
+  private void setController(TOHApp controller) {
+    this.controller = controller;
+  }
+
+  public void setViewToh(TowerOfHanoi viewToh) {
+    this.viewToh = viewToh;
   }
 
   class Reset extends KeyStrokeAction {
