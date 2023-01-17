@@ -34,20 +34,8 @@ public class TOHApp
   
   public TOHApp ()
   {
-    toh = new TowerOfHanoi (NUM_DISCS);
-    viewToh = new TowerOfHanoi(NUM_DISCS);
-
-    try
-    {
-      // task is to move all discs from peg A to peg C
-      solve(toh, NUM_DISCS, Peg.A, Peg.C, Peg.B);
-    }
-    catch (IllegalTowerOfHanoiMoveException e)
-    {
-      System.out.println ("illegal move: " + e);
-    }
-
-    TOHUserInterface GUI = new TOHUserInterface (this, viewToh);
+    GUI = new TOHUserInterface (this);
+    resetToh();
   }
 
   public void makeMove()
@@ -77,6 +65,13 @@ public class TOHApp
   public void resetToh() {
     toh = new TowerOfHanoi(NUM_DISCS);
     viewToh = new TowerOfHanoi(NUM_DISCS);
+
+    try {
+      solve(toh, NUM_DISCS, Peg.A, Peg.C, Peg.B);
+    } catch (IllegalTowerOfHanoiMoveException e) {
+      System.out.println ("illegal move: " + e);
+    }
+
     GUI.setViewToh(viewToh);
   }
 

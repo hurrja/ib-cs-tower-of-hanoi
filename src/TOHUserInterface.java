@@ -20,11 +20,10 @@ import java.awt.event.*;
 public class TOHUserInterface extends JFrame
 {
 
-  public TOHUserInterface (TOHApp controller, TowerOfHanoi viewToh)
+  public TOHUserInterface (TOHApp controller)
   {
     super ("Tower of Hanoi solution framework");
-    setViewToh(viewToh);
-    setController(controller);
+    this.controller = controller;
     initializeKeyBindings();
 
     setSize (XSIZE, YSIZE);
@@ -160,16 +159,25 @@ public class TOHUserInterface extends JFrame
     drawString (graphics, str, x, y, 16);
   }
 
-  public TOHApp getController() {
+  private TOHApp getController() {
     return controller;
-  }
-
-  private void setController(TOHApp controller) {
-    this.controller = controller;
   }
 
   public void setViewToh(TowerOfHanoi viewToh) {
     this.viewToh = viewToh;
+  }
+
+  class UpdateNumDiscs extends KeyStrokeAction {
+    UpdateNumDiscs() {
+                super("Reset", KeyStroke.getKeyStroke(KeyEvent.VK_R, 0), "Set the number of discs present in the tower of hanoi");
+                                                                                 }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+      if (applicationUpdateTimer.isRunning()) new PlayPause().actionPerformed(e);
+      getController().resetToh();
+      repaint();
+    }
   }
 
   class Reset extends KeyStrokeAction {
@@ -262,7 +270,7 @@ public class TOHUserInterface extends JFrame
   private final KeyStrokeAction[] actions = {
           new MoveBack(),
           new PlayPause(),
-          new Reset(),
+          new UpdateNumDiscs(),
           new MoveForward(),
           new SpeedUp(),
           new SlowDown(),
