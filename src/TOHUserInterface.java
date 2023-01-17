@@ -105,6 +105,7 @@ public class TOHUserInterface extends JFrame
     speedSlider = new JSlider(MIN_UPDATE_INTERVAL, MAX_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL);
     speedSlider.setPreferredSize(new Dimension(100, 20));
     speedSlider.setFocusable(false);
+    speedSlider.setToolTipText("You can also use the '+' and '-' keys to adjust the speed.");
     speedSlider.addChangeListener(
             e -> {
               JSlider source = (JSlider) e.getSource();
