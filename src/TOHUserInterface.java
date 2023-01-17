@@ -13,7 +13,9 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import javax.swing.*;        
+import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.*;
 
@@ -41,18 +43,43 @@ public class TOHUserInterface extends JFrame
 
     setLayout(new BorderLayout());
     add(tohPanel, BorderLayout.CENTER);
-    initializeButtonControls();
+    initializeControls();
 
     setDefaultCloseOperation(EXIT_ON_CLOSE);
     setVisible (true);
+    requestFocus();
 
     applicationUpdateTimer = new Timer (updateIntervalMs, new MoveForward());
     applicationUpdateTimer.setActionCommand("Timer");
   }
 
-  private void initializeButtonControls () {
+  private void initializeControls() {
+    final int SPACER_WIDTH = 50;
     JPanel controls = new JPanel();
     controls.setBackground(Color.WHITE);
+
+    JLabel discsLabel = new JLabel("Number of discs: ");
+    controls.add(discsLabel);
+
+    SpinnerModel model = new SpinnerNumberModel(TOHApp.DEFAULT_DISCS, TOHApp.MIN_DISCS, TOHApp.MAX_DISCS, 1);
+    JSpinner spinner = new JSpinner(model);
+    spinner.setToolTipText("Press 'reset' to apply changes.");
+
+    //prevents typing and stealing focus
+    JSpinner.DefaultEditor editor = (JSpinner.DefaultEditor) spinner.getEditor();
+    editor.getTextField().setEditable(false);
+    editor.getTextField().setFocusable(false);
+
+    spinner.addChangeListener(
+            e -> {
+              JSpinner source = (JSpinner) e.getSource();
+              getController().setNumDiscs((int) source.getValue());
+            }
+    );
+    controls.add(spinner);
+
+    //spacer
+    controls.add(Box.createHorizontalStrut(SPACER_WIDTH));
 
     for (KeyStrokeAction act : actions) {
       JButton button = new JButton();
@@ -63,6 +90,9 @@ public class TOHUserInterface extends JFrame
       if (act instanceof PlayPause) playButton = button;
       controls.add(button);
     }
+
+    //spacer
+    controls.add(Box.createHorizontalStrut(SPACER_WIDTH));
 
     add (controls, BorderLayout.PAGE_END);
   }
@@ -167,19 +197,6 @@ public class TOHUserInterface extends JFrame
     this.viewToh = viewToh;
   }
 
-  class UpdateNumDiscs extends KeyStrokeAction {
-    UpdateNumDiscs() {
-                super("Reset", KeyStroke.getKeyStroke(KeyEvent.VK_R, 0), "Set the number of discs present in the tower of hanoi");
-                                                                                 }
-
-    @Override
-    public void actionPerformed(ActionEvent e) {
-      if (applicationUpdateTimer.isRunning()) new PlayPause().actionPerformed(e);
-      getController().resetToh();
-      repaint();
-    }
-  }
-
   class Reset extends KeyStrokeAction {
     Reset() {
       super("Reset", KeyStroke.getKeyStroke(KeyEvent.VK_R, 0), "R");
@@ -270,7 +287,7 @@ public class TOHUserInterface extends JFrame
   private final KeyStrokeAction[] actions = {
           new MoveBack(),
           new PlayPause(),
-          new UpdateNumDiscs(),
+          new Reset(),
           new MoveForward(),
           new SpeedUp(),
           new SlowDown(),

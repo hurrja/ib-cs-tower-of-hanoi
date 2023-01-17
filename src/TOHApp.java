@@ -35,6 +35,8 @@ public class TOHApp
   public TOHApp ()
   {
     GUI = new TOHUserInterface (this);
+
+    numDiscs = DEFAULT_DISCS;
     resetToh();
   }
 
@@ -63,11 +65,11 @@ public class TOHApp
   }
 
   public void resetToh() {
-    toh = new TowerOfHanoi(NUM_DISCS);
-    viewToh = new TowerOfHanoi(NUM_DISCS);
+    toh = new TowerOfHanoi(numDiscs);
+    viewToh = new TowerOfHanoi(numDiscs);
 
     try {
-      solve(toh, NUM_DISCS, Peg.A, Peg.C, Peg.B);
+      solve(toh, numDiscs, Peg.A, Peg.C, Peg.B);
     } catch (IllegalTowerOfHanoiMoveException e) {
       System.out.println ("illegal move: " + e);
     }
@@ -75,10 +77,22 @@ public class TOHApp
     GUI.setViewToh(viewToh);
   }
 
+  public void setNumDiscs(int num) {
+    if (num > MIN_DISCS && num <= MAX_DISCS) this.numDiscs = num;
+  }
+  public int getNumDiscs() {
+    return numDiscs; //used to return the default n of discs to the view
+  }
+
   private TOHUserInterface GUI;
+
+  public final static int MIN_DISCS = 2;
+  public final static int MAX_DISCS = 20;
+  public final static int DEFAULT_DISCS = 5;
+  private int numDiscs;
+
   private TowerOfHanoi toh;
   private TowerOfHanoi viewToh;
-  final int NUM_DISCS = 5;
 }
 
 
