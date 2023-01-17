@@ -14,10 +14,13 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import javax.swing.*;
+import javax.swing.Timer;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.*;
+import java.util.jar.JarEntry;
 
 public class TOHUserInterface extends JFrame
 {
@@ -49,7 +52,7 @@ public class TOHUserInterface extends JFrame
     setVisible (true);
     requestFocus();
 
-    applicationUpdateTimer = new Timer (updateIntervalMs, new MoveForward());
+    applicationUpdateTimer = new Timer (DEFAULT_UPDATE_INTERVAL, new MoveForward());
     applicationUpdateTimer.setActionCommand("Timer");
   }
 
@@ -62,28 +65,30 @@ public class TOHUserInterface extends JFrame
     controls.add(discsLabel);
 
     SpinnerModel model = new SpinnerNumberModel(TOHApp.DEFAULT_DISCS, TOHApp.MIN_DISCS, TOHApp.MAX_DISCS, 1);
-    JSpinner spinner = new JSpinner(model);
-    spinner.setToolTipText("Press 'reset' to apply changes.");
+    JSpinner discsSpinner = new JSpinner(model);
+    discsSpinner.setToolTipText("Press 'reset' to apply changes.");
 
     //prevents typing and stealing focus
-    JSpinner.DefaultEditor editor = (JSpinner.DefaultEditor) spinner.getEditor();
+    JSpinner.DefaultEditor editor = (JSpinner.DefaultEditor) discsSpinner.getEditor();
     editor.getTextField().setEditable(false);
     editor.getTextField().setFocusable(false);
 
-    spinner.addChangeListener(
+    discsSpinner.addChangeListener(
             e -> {
               JSpinner source = (JSpinner) e.getSource();
               getController().setNumDiscs((int) source.getValue());
             }
     );
-    controls.add(spinner);
+    controls.add(discsSpinner);
 
     //spacer
     controls.add(Box.createHorizontalStrut(SPACER_WIDTH));
 
     for (KeyStrokeAction act : actions) {
-      JButton button = new JButton();
+      //do not create a button if no tooltip (short_description) is set in the KeyStrokeAction
+      if (act.getValue(Action.SHORT_DESCRIPTION) == null) continue;
 
+      JButton button = new JButton();
       button.setAction(act);
       button.setFocusable(false);
 
@@ -93,6 +98,26 @@ public class TOHUserInterface extends JFrame
 
     //spacer
     controls.add(Box.createHorizontalStrut(SPACER_WIDTH));
+
+    JLabel speedLabel = new JLabel("Speed: ");
+    controls.add(speedLabel);
+
+    speedSlider = new JSlider(MIN_UPDATE_INTERVAL, MAX_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL);
+    speedSlider.setPreferredSize(new Dimension(100, 20));
+    speedSlider.setFocusable(false);
+    speedSlider.addChangeListener(
+            e -> {
+              JSlider source = (JSlider) e.getSource();
+              int interval = source.getValue();
+
+              //invert interval (makes more intuitive sense with slider mechanic)
+              if (interval >= MIN_UPDATE_INTERVAL && interval <= MAX_UPDATE_INTERVAL)
+                interval = MAX_UPDATE_INTERVAL - interval + MIN_UPDATE_INTERVAL;
+
+              applicationUpdateTimer.setDelay(interval);
+            }
+    );
+    controls.add(speedSlider);
 
     add (controls, BorderLayout.PAGE_END);
   }
@@ -189,14 +214,6 @@ public class TOHUserInterface extends JFrame
     drawString (graphics, str, x, y, 16);
   }
 
-  private TOHApp getController() {
-    return controller;
-  }
-
-  public void setViewToh(TowerOfHanoi viewToh) {
-    this.viewToh = viewToh;
-  }
-
   class Reset extends KeyStrokeAction {
     Reset() {
       super("Reset", KeyStroke.getKeyStroke(KeyEvent.VK_R, 0), "R");
@@ -230,29 +247,23 @@ public class TOHUserInterface extends JFrame
 
   class SpeedUp extends KeyStrokeAction {
     SpeedUp() {
-      super("+", KeyStroke.getKeyStroke('+'), "Increase the speed of autoplay"); //necessary to support both US and EU layouts
+      super("+", KeyStroke.getKeyStroke('+')); //necessary to support both US and EU layouts
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-      int currDelay = applicationUpdateTimer.getDelay();
-      if (currDelay <= 1) return;
-
-      applicationUpdateTimer.setDelay(currDelay / 2);
+        speedSlider.setValue(speedSlider.getValue() + 100);
     }
   }
 
   class SlowDown extends KeyStrokeAction {
     SlowDown() {
-      super("-", KeyStroke.getKeyStroke(KeyEvent.VK_MINUS, 0), "Decrease the speed of autoplay");
+      super("-", KeyStroke.getKeyStroke(KeyEvent.VK_MINUS, 0));
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-      int currDelay = applicationUpdateTimer.getDelay();
-      if (currDelay >= 5000) return;
-
-      applicationUpdateTimer.setDelay(applicationUpdateTimer.getDelay() * 2);
+        speedSlider.setValue(speedSlider.getValue() - 100);
     }
   }
 
@@ -290,19 +301,36 @@ public class TOHUserInterface extends JFrame
           new Reset(),
           new MoveForward(),
           new SpeedUp(),
-          new SlowDown(),
+          new SlowDown()
   };
+
+  private TOHApp getController() {
+    return controller;
+  }
+
+  public void setViewToh(TowerOfHanoi viewToh) {
+    this.viewToh = viewToh;
+  }
+
+  public void setUpdateIntervalMs(int updateIntervalMs) {
+    if (updateIntervalMs >= MIN_UPDATE_INTERVAL && updateIntervalMs <= MAX_UPDATE_INTERVAL)
+      applicationUpdateTimer.setDelay(updateIntervalMs);
+  }
 
   public final int XSIZE = 1024;
   public final int YSIZE = 768;
   public final int NUM_PEGS = Peg.values ().length;
 
+  private final static int DEFAULT_UPDATE_INTERVAL = 1000;
+  private final static int MIN_UPDATE_INTERVAL = 0;
+  private final static int MAX_UPDATE_INTERVAL = 3000;
   private final Timer applicationUpdateTimer;
-  public final int updateIntervalMs = 1000;
+
   private TowerOfHanoi viewToh;
   private TOHApp controller;
 
   private JPanel tohPanel;
   private JButton playButton;
+  private JSlider speedSlider;
 }
 
