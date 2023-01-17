@@ -12,7 +12,6 @@ abstract class KeyStrokeAction extends AbstractAction {
 
     KeyStrokeAction(String name, KeyStroke keyStroke, String tooltip) {
         super(name);
-        putValue(Action.NAME, name);
         putValue(Action.SHORT_DESCRIPTION, tooltip);
         this.keyStroke = keyStroke;
     }
