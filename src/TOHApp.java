@@ -78,7 +78,7 @@ public class TOHApp
   }
 
   public void setNumDiscs(int num) {
-    if (num > MIN_DISCS && num <= MAX_DISCS) this.numDiscs = num;
+    if (num >= MIN_DISCS && num <= MAX_DISCS) this.numDiscs = num;
   }
   public int getNumDiscs() {
     return numDiscs; //used to return the default n of discs to the view
