@@ -296,13 +296,25 @@ public class TOHUserInterface extends JFrame
     }
   }
 
+  class Quit extends KeyStrokeAction {
+    Quit() {
+      super("Quit", KeyStroke.getKeyStroke(KeyEvent.VK_Q, 0), "Q");
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+      System.exit (0);
+    }
+  }
+
   private final KeyStrokeAction[] actions = {
           new MoveBack(),
           new PlayPause(),
           new Reset(),
           new MoveForward(),
           new SpeedUp(),
-          new SlowDown()
+          new SlowDown(),
+          new Quit()
   };
 
   private TOHApp getController() {
