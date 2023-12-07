@@ -22,14 +22,18 @@ public class TOHApp
     SwingUtilities.invokeLater (() -> new TOHApp ());
   }
   
-  public static void solve(TowerOfHanoi toh, int numDiscs, Peg from, Peg to, Peg intermediate)
+  public void solve (int numDiscs, Peg from, Peg to, Peg intermediate)
     throws IllegalTowerOfHanoiMoveException
   {
     // code to be written to replace this feeble attempt
-    toh.move (from, intermediate); // move top disc to intermediate
-    toh.move (from, to); // move next disc to target
-    toh.move (from, to); // move next disc to target
-
+    move (from, intermediate); // move top disc to intermediate
+    move (from, to); // move next disc to target
+  }
+  
+  private void move (Peg from, Peg to)
+    throws IllegalTowerOfHanoiMoveException
+  {
+    toh.move (from, to);
   }
   
   public TOHApp ()
@@ -37,7 +41,7 @@ public class TOHApp
     GUI = new TOHUserInterface (this);
 
     numDiscs = DEFAULT_DISCS;
-    resetToh();
+    resetToh ();
   }
 
   public void makeMove()
@@ -57,28 +61,34 @@ public class TOHApp
     }
   }
 
-  public void retractMove() {
-    if (viewToh.getMoves().size() < 1) return;
+  public void retractMove () {
+    if (viewToh.getMoves ().size () < 1) return;
 
-    Move move = viewToh.undoLastMove();
-    toh.getMoves().addFirst(move);
+    Move move = viewToh.undoLastMove ();
+    toh.getMoves ().addFirst (move);
   }
 
-  public void resetToh() {
-    toh = new TowerOfHanoi(numDiscs);
-    viewToh = new TowerOfHanoi(numDiscs);
+  public void resetToh ()
+  {
+    toh = new TowerOfHanoi (numDiscs);
+    viewToh = new TowerOfHanoi (numDiscs);
 
-    try {
-      solve(toh, numDiscs, Peg.A, Peg.C, Peg.B);
-    } catch (IllegalTowerOfHanoiMoveException e) {
+    try
+    {
+      solve (numDiscs, Peg.A, Peg.C, Peg.B);
+    }
+    catch (IllegalTowerOfHanoiMoveException e)
+    {
       System.out.println ("illegal move: " + e);
     }
-
-    GUI.setViewToh(viewToh);
+    
+    GUI.setViewToh (viewToh);
   }
 
-  public void setNumDiscs(int num) {
-    if (num >= MIN_DISCS && num <= MAX_DISCS) this.numDiscs = num;
+  public void setNumDiscs (int num)
+  {
+    if (num >= MIN_DISCS && num <= MAX_DISCS)
+      numDiscs = num;
   }
 
   private TOHUserInterface GUI;
