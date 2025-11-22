@@ -4,9 +4,12 @@
    solving Tower of Hanoi.
 
 ** Installation in VS code
-** Alternative installation method
-   1. Clone repository.
-
+   To install and run the application in VS code, do the following:
+   1. Clone the repository.
+   2. Create a new =venv=.
+      1. In the list of dependencies to install, select =requirements.txt=.
+   3. Open =main.py=.
+   4. Run Python file.
 ** Programming your solution
    Class =TOHApp= contains method
    #+begin_src python :exports code
@@ -31,7 +34,7 @@
      exceptions are printed into console.
 
 ** License
-   Copyright (C) 2020--2025 Jarmo Hurri, Aleksei Terin
+   Copyright (C) 2020-2025 Jarmo Hurri, Aleksei Terin
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
