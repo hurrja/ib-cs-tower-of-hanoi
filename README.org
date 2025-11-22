@@ -3,41 +3,35 @@
    This repository contains model, view and controller classes for
    solving Tower of Hanoi.
 
-** Installation in IDEA
-   To install the application in IDEA, do the following:
-   1. Clone the repository.
-   2. Right click on class =TOHApp=.
-   3. Select =Run TOHApp.main()=
-   You are now able to make changes to the project and run it again.
-
+** Installation in VS code
 ** Alternative installation method
    1. Clone repository.
-   2. Run =ant= default target (builds and runs the application).
 
 ** Programming your solution
    Class =TOHApp= contains method
-   #+begin_src java :exports code
-     static void solve (TowerOfHanoi toh, int numDiscs, Peg from, Peg to)
+   #+begin_src python :exports code
+     solve(num_discs, from_peg, to_peg, intermediate)
    #+end_src
-   which you need to modify to solve the problems. The =main()= of
-   this class calls method =solve()= with correct parameters for
-   solving the problem, that is, moving all discs from rod A to rod C.
+   which you need to modify to solve the problems. Method
+   =reset_toh()= of this class calls method =solve()= with correct
+   parameters for solving the problem, that is, moving all discs from
+   peg A to peg C.
 
    The version of =solve()= in this repository is a feeble attempt to
    solve this problem, and you need to replace it with your own
-   version. Still, the feeble version demonstrates the only external
-   methods you need to use:
-   - =class TowerOfHanoi= contains method
-     #+begin_src java :exports code
-       move (Peg from, Peg to)
+   version. Still, the feeble version demonstrates the only additional
+   method you need to use:
+   - method
+     #+begin_src python :exports code
+       move(from_peg, to_peg)
      #+end_src
-     which moves top disc of rod =from= to rod =to=. This may throw an
-     exception if the move breaks the rules of Tower of Hanoi, but
-     this exception is caught by the program. Possible exceptions are
-     printed into console.
+     which moves top disc of peg =from_peg= to peg =to_peg=. This may
+     throw an exception if the move breaks the rules of Tower of
+     Hanoi, but this exception is caught by the program. Possible
+     exceptions are printed into console.
 
 ** License
-   Copyright (C) 2020--2023 Jarmo Hurri, Aleksei Terin
+   Copyright (C) 2020--2025 Jarmo Hurri, Aleksei Terin
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by

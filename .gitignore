@@ -1,7 +1,9 @@
-*.class
+.venv/
+__pycache__/
 *~
-build/
 TAGS
-.idea/
-out/
+*.class
 *.iml
+java/build/
+java/.idea/
+java/out/
